@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <script src="https://unpkg.com/marked@15.0.7/marked.min.js"></script>
+    <script src="/static/providers/scaleway.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -171,6 +173,180 @@
         .lang-btn.active:hover {
             background: rgba(200, 168, 78, 0.22);
         }
+
+        .compliance-link {
+            margin-top: 2.5rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.35);
+            cursor: pointer;
+            transition: color 0.2s;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .compliance-link:hover {
+            color: rgba(200, 168, 78, 0.7);
+            border-color: rgba(200, 168, 78, 0.4);
+        }
+
+        .compliance-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 100;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 3rem 1rem;
+            overflow-y: auto;
+        }
+
+        .compliance-overlay.open {
+            display: flex;
+        }
+
+        .compliance-panel {
+            background: #141e30;
+            border: 1px solid rgba(200, 168, 78, 0.15);
+            border-radius: 16px;
+            padding: 2.5rem 3rem;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .compliance-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.25rem;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .compliance-close:hover {
+            color: rgba(255, 255, 255, 0.9);
+            background: none;
+            border: none;
+            transform: none;
+        }
+
+        .compliance-content {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .compliance-content h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.6rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+            letter-spacing: 0.02em;
+        }
+
+        .compliance-content h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #c8a84e;
+            margin: 2rem 0 0.75rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 1px solid rgba(200, 168, 78, 0.15);
+        }
+
+        .compliance-content h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.85);
+            margin: 1.5rem 0 0.5rem;
+        }
+
+        .compliance-content p {
+            margin: 0.6rem 0;
+        }
+
+        .compliance-content ul, .compliance-content ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .compliance-content li {
+            margin: 0.3rem 0;
+        }
+
+        .compliance-content a {
+            color: #6cb4ee;
+            text-decoration: none;
+        }
+
+        .compliance-content a:hover {
+            text-decoration: underline;
+        }
+
+        .compliance-content code {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .compliance-content pre {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .compliance-content pre code {
+            background: none;
+            padding: 0;
+        }
+
+        .compliance-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        .compliance-content th {
+            text-align: left;
+            padding: 0.6rem 0.75rem;
+            border-bottom: 2px solid rgba(200, 168, 78, 0.2);
+            color: #c8a84e;
+            font-weight: 600;
+        }
+
+        .compliance-content td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .compliance-content hr {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 2rem 0;
+        }
+
+        .compliance-content strong {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .compliance-loading {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -195,8 +371,22 @@
         </button>
     </div>
 
+    <a class="compliance-link" id="compliance-link" onclick="toggleCompliance()">
+        {{ "Comment cette app s'inscrit dans une démarche de cloud souverain" if language == "fr" else "How this app supports cloud sovereignty" }}
+    </a>
+
+    <div class="compliance-overlay" id="compliance-overlay" onclick="if(event.target===this)toggleCompliance()">
+        <div class="compliance-panel">
+            <button class="compliance-close" onclick="toggleCompliance()">&times;</button>
+            <div class="compliance-content" id="compliance-content">
+                <p class="compliance-loading">Loading...</p>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentLang = "{{ language }}";
+        let complianceCache = {};
 
         function translateTo(lang, event) {
             if (lang === currentLang) return;
@@ -219,6 +409,70 @@
             newBtn.setAttribute("hx-get", "/ui/wisdom?language=" + lang);
             newBtn.textContent = lang === "fr" ? "Nouvelle sagesse" : "New wisdom";
             htmx.process(newBtn);
+
+            document.getElementById("compliance-link").textContent =
+                lang === "fr"
+                    ? "Comment cette app s\u2019inscrit dans une d\u00e9marche de cloud souverain"
+                    : "How this app supports cloud sovereignty";
+        }
+
+        async function toggleCompliance() {
+            const overlay = document.getElementById("compliance-overlay");
+            if (overlay.classList.contains("open")) {
+                overlay.classList.remove("open");
+                return;
+            }
+            overlay.classList.add("open");
+
+            const url = PROVIDER.complianceUrl(currentLang);
+
+            if (complianceCache[currentLang]) {
+                document.getElementById("compliance-content").innerHTML = complianceCache[currentLang];
+                return;
+            }
+
+            try {
+                const res = await fetch(url);
+                const md = await res.text();
+                const renderer = new marked.Renderer();
+                function rawText(tokens) {
+                    return tokens.map(t => t.raw || (t.tokens ? rawText(t.tokens) : t.text || "")).join("");
+                }
+                renderer.heading = function({ tokens, depth }) {
+                    const display = this.parser.parseInline(tokens);
+                    const slug = rawText(tokens).toLowerCase()
+                        .replace(/[^\p{L}\p{N}\s-]/gu, '')
+                        .replace(/ /g, '-')
+                        .trim();
+                    return '<h' + depth + ' id="' + slug + '">' + display + '</h' + depth + '>';
+                };
+                const baseUrl = PROVIDER.browseUrl();
+                const originalLink = renderer.link.bind(renderer);
+                renderer.link = function({ href, title, tokens }) {
+                    if (href && !href.startsWith("#") && !href.startsWith("http")) {
+                        href = baseUrl + href;
+                    }
+                    return originalLink.call(this, { href, title, tokens });
+                };
+                const html = marked.parse(md, { renderer });
+                complianceCache[currentLang] = html;
+                const content = document.getElementById("compliance-content");
+                content.innerHTML = html;
+                content.addEventListener("click", function(e) {
+                    const link = e.target.closest("a");
+                    if (!link) return;
+                    const href = link.getAttribute("href");
+                    if (href && href.startsWith("#")) {
+                        e.preventDefault();
+                        const id = decodeURIComponent(href.slice(1));
+                        const target = document.getElementById(id);
+                        if (target) target.scrollIntoView({ behavior: "smooth" });
+                    }
+                });
+            } catch {
+                document.getElementById("compliance-content").innerHTML =
+                    "<p>Could not load compliance document.</p>";
+            }
         }
     </script>
 </body>
