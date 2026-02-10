@@ -16,34 +16,29 @@ from seed import SEED_DATA
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
+SEED_VERSION = 2
+
+
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
         await conn.execute(text(
-            "ALTER TABLE wisdom ADD COLUMN IF NOT EXISTS source_url VARCHAR(512)"
+            "CREATE TABLE IF NOT EXISTS meta (key VARCHAR(64) PRIMARY KEY, value VARCHAR(256))"
         ))
 
     async with async_session() as session:
-        result = await session.execute(select(func.count(Wisdom.id)))
-        count = result.scalar()
-        if count == 0:
+        result = await session.execute(text("SELECT value FROM meta WHERE key = 'seed_version'"))
+        row = result.scalar_one_or_none()
+        current_version = int(row) if row else 0
+
+        if current_version < SEED_VERSION:
+            await session.execute(text("DELETE FROM wisdom"))
             for entry in SEED_DATA:
                 session.add(Wisdom(**entry))
-            await session.commit()
-        else:
-            for entry in SEED_DATA:
-                if entry.get("source_url") and entry.get("translation_group"):
-                    lang = entry.get("language", "en")
-                    result = await session.execute(
-                        select(Wisdom).where(
-                            Wisdom.translation_group == entry["translation_group"],
-                            Wisdom.language == lang,
-                            Wisdom.source_url.is_(None),
-                        )
-                    )
-                    row = result.scalar_one_or_none()
-                    if row:
-                        row.source_url = entry["source_url"]
+            await session.execute(text(
+                "INSERT INTO meta (key, value) VALUES ('seed_version', :v) "
+                "ON CONFLICT (key) DO UPDATE SET value = :v"
+            ), {"v": str(SEED_VERSION)})
             await session.commit()
 
 
