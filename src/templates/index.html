@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sovereign Cloud Wisdom</title>
+    <title>{{ "Sagesse du Cloud Souverain" if language == "fr" else "Sovereign Cloud Wisdom" }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -174,7 +174,7 @@
     </style>
 </head>
 <body>
-    <h1>Sovereign Cloud Wisdom</h1>
+    <h1 id="title">{{ "Sagesse du Cloud Souverain" if language == "fr" else "Sovereign Cloud Wisdom" }}</h1>
 
     {% include "fragments/wisdom.html" %}
 
@@ -210,6 +210,10 @@
             btn.setAttribute("hx-get", "/ui/wisdom/translate?translation_group=" + group + "&language=" + lang);
             htmx.process(btn);
             htmx.trigger(btn, "click");
+
+            document.getElementById("title").textContent =
+                lang === "fr" ? "Sagesse du Cloud Souverain" : "Sovereign Cloud Wisdom";
+            document.title = document.getElementById("title").textContent;
 
             const newBtn = document.getElementById("new-btn");
             newBtn.setAttribute("hx-get", "/ui/wisdom?language=" + lang);
