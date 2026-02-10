@@ -30,6 +30,21 @@ async def init_db():
             for entry in SEED_DATA:
                 session.add(Wisdom(**entry))
             await session.commit()
+        else:
+            for entry in SEED_DATA:
+                if entry.get("source_url") and entry.get("translation_group"):
+                    lang = entry.get("language", "en")
+                    result = await session.execute(
+                        select(Wisdom).where(
+                            Wisdom.translation_group == entry["translation_group"],
+                            Wisdom.language == lang,
+                            Wisdom.source_url.is_(None),
+                        )
+                    )
+                    row = result.scalar_one_or_none()
+                    if row:
+                        row.source_url = entry["source_url"]
+            await session.commit()
 
 
 @asynccontextmanager
