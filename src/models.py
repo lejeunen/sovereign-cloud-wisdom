@@ -21,6 +21,7 @@ class Wisdom(Base):
     author: Mapped[str | None] = mapped_column(String(255), nullable=True)
     category: Mapped[str] = mapped_column(String(50), nullable=False, default="principle")
     language: Mapped[str] = mapped_column(String(5), nullable=False, default="en")
+    translation_group: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -41,6 +42,7 @@ class WisdomCreate(BaseModel):
     author: str | None = Field(None, max_length=255)
     category: CategoryEnum = CategoryEnum.principle
     language: str = Field("en", max_length=5)
+    translation_group: int | None = None
 
 
 class WisdomResponse(BaseModel):
@@ -49,6 +51,7 @@ class WisdomResponse(BaseModel):
     author: str | None
     category: str
     language: str
+    translation_group: int | None
     created_at: datetime
 
     model_config = {"from_attributes": True}

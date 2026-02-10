@@ -88,6 +88,27 @@ async def ui_wisdom_fragment(
     })
 
 
+@app.get("/ui/wisdom/translate", response_class=HTMLResponse)
+async def ui_wisdom_translate(
+    request: Request,
+    translation_group: int,
+    language: str,
+    session: AsyncSession = Depends(get_session),
+):
+    result = await session.execute(
+        select(Wisdom)
+        .where(Wisdom.translation_group == translation_group, Wisdom.language == language)
+        .limit(1)
+    )
+    wisdom = result.scalar_one_or_none()
+    if not wisdom:
+        wisdom = await _random_wisdom(session, language)
+    return templates.TemplateResponse("fragments/wisdom.html", {
+        "request": request,
+        "wisdom": wisdom,
+    })
+
+
 # --- API endpoints ---
 
 
@@ -138,6 +159,7 @@ async def create_wisdom(
         author=payload.author,
         category=payload.category.value,
         language=payload.language,
+        translation_group=payload.translation_group,
     )
     session.add(wisdom)
     await session.commit()
