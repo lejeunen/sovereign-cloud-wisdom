@@ -1,7 +1,13 @@
+{% set labels = {
+    "principle": {"en": "principle", "fr": "principe"},
+    "fact": {"en": "fact", "fr": "fait"},
+    "quote": {"en": "quote", "fr": "citation"},
+    "proverb": {"en": "proverb", "fr": "proverbe"},
+} %}
 <div id="wisdom-card" class="wisdom-card" data-translation-group="{{ wisdom.translation_group }}">
     <p class="wisdom-text">{{ wisdom.text }}</p>
     {% if wisdom.author %}
     <p class="wisdom-author">— {{ wisdom.author }}</p>
     {% endif %}
-    <span class="wisdom-category wisdom-category-{{ wisdom.category }}">{{ wisdom.category }}</span>
+    <span class="wisdom-category wisdom-category-{{ wisdom.category }}">{{ labels[wisdom.category][language] }}</span>
 </div>

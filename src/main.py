@@ -85,6 +85,7 @@ async def ui_wisdom_fragment(
     return templates.TemplateResponse("fragments/wisdom.html", {
         "request": request,
         "wisdom": wisdom,
+        "language": language,
     })
 
 
@@ -106,6 +107,7 @@ async def ui_wisdom_translate(
     return templates.TemplateResponse("fragments/wisdom.html", {
         "request": request,
         "wisdom": wisdom,
+        "language": language,
     })
 
 
