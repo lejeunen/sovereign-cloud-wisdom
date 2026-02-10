@@ -1,0 +1,7 @@
+<div id="wisdom-card" class="wisdom-card">
+    <p class="wisdom-text">{{ wisdom.text }}</p>
+    {% if wisdom.author %}
+    <p class="wisdom-author">— {{ wisdom.author }}</p>
+    {% endif %}
+    <span class="wisdom-category">{{ wisdom.category }}</span>
+</div>

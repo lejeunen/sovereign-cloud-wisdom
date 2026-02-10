@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sovereign Cloud Wisdom</title>
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a1a;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: #333;
+        }
+
+        .wisdom-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2.5rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .wisdom-text {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .wisdom-author {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .wisdom-category {
+            display: inline-block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #555;
+            background: #eee;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+        }
+
+        .controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button, .lang-btn {
+            font-size: 0.9rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s;
+            text-decoration: none;
+        }
+
+        button:hover, .lang-btn:hover {
+            background: #eee;
+        }
+
+        .lang-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+            border-color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sovereign Cloud Wisdom</h1>
+
+    {% include "fragments/wisdom.html" %}
+
+    <div class="controls">
+        <a class="lang-btn {{ 'active' if language == 'en' }}"
+           hx-get="/ui/wisdom?language=en"
+           hx-target="#wisdom-card"
+           hx-swap="outerHTML"
+           onclick="setLang('en')">EN</a>
+        <a class="lang-btn {{ 'active' if language == 'fr' }}"
+           hx-get="/ui/wisdom?language=fr"
+           hx-target="#wisdom-card"
+           hx-swap="outerHTML"
+           onclick="setLang('fr')">FR</a>
+        <button id="new-btn"
+                hx-get="/ui/wisdom"
+                hx-target="#wisdom-card"
+                hx-swap="outerHTML">
+            {{ "Nouvelle sagesse" if language == "fr" else "New wisdom" }}
+        </button>
+    </div>
+
+    <script>
+        let currentLang = "{{ language }}";
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll(".lang-btn").forEach(el => el.classList.remove("active"));
+            event.target.classList.add("active");
+            // Update the "new wisdom" button to use current language
+            const btn = document.getElementById("new-btn");
+            btn.setAttribute("hx-get", "/ui/wisdom?language=" + lang);
+            btn.textContent = lang === "fr" ? "Nouvelle sagesse" : "New wisdom";
+            htmx.process(btn);
+        }
+    </script>
+</body>
+</html>

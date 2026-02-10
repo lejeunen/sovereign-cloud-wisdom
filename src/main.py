@@ -1,13 +1,18 @@
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import async_session, engine, get_session
 from models import Base, Wisdom, WisdomCreate, WisdomResponse
 from seed import SEED_DATA
+
+templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
 async def init_db():
@@ -38,7 +43,55 @@ app = FastAPI(
 )
 
 
-@app.get("/", response_model=WisdomResponse)
+def _parse_language(request: Request) -> str:
+    accept = request.headers.get("accept-language", "")
+    for part in accept.split(","):
+        lang = part.split(";")[0].strip().lower()
+        if lang.startswith("fr"):
+            return "fr"
+        if lang.startswith("en"):
+            return "en"
+    return "en"
+
+
+async def _random_wisdom(session: AsyncSession, language: str) -> Wisdom | None:
+    result = await session.execute(
+        select(Wisdom).where(Wisdom.language == language).order_by(func.random()).limit(1)
+    )
+    return result.scalar_one_or_none()
+
+
+# --- UI endpoints ---
+
+
+@app.get("/", response_class=HTMLResponse)
+async def ui_home(request: Request, session: AsyncSession = Depends(get_session)):
+    language = _parse_language(request)
+    wisdom = await _random_wisdom(session, language)
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "wisdom": wisdom,
+        "language": language,
+    })
+
+
+@app.get("/ui/wisdom", response_class=HTMLResponse)
+async def ui_wisdom_fragment(
+    request: Request,
+    language: str = "en",
+    session: AsyncSession = Depends(get_session),
+):
+    wisdom = await _random_wisdom(session, language)
+    return templates.TemplateResponse("fragments/wisdom.html", {
+        "request": request,
+        "wisdom": wisdom,
+    })
+
+
+# --- API endpoints ---
+
+
+@app.get("/api/random", response_model=WisdomResponse)
 async def random_wisdom(session: AsyncSession = Depends(get_session)):
     """Get a random piece of sovereign cloud wisdom."""
     result = await session.execute(select(Wisdom).order_by(func.random()).limit(1))
@@ -48,7 +101,7 @@ async def random_wisdom(session: AsyncSession = Depends(get_session)):
     return wisdom
 
 
-@app.get("/wisdom", response_model=list[WisdomResponse])
+@app.get("/api/wisdom", response_model=list[WisdomResponse])
 async def list_wisdom(
     category: str | None = None,
     language: str | None = None,
@@ -64,7 +117,7 @@ async def list_wisdom(
     return result.scalars().all()
 
 
-@app.get("/wisdom/{wisdom_id}", response_model=WisdomResponse)
+@app.get("/api/wisdom/{wisdom_id}", response_model=WisdomResponse)
 async def get_wisdom(wisdom_id: int, session: AsyncSession = Depends(get_session)):
     """Get a specific wisdom entry by ID."""
     result = await session.execute(select(Wisdom).where(Wisdom.id == wisdom_id))
@@ -74,7 +127,7 @@ async def get_wisdom(wisdom_id: int, session: AsyncSession = Depends(get_session
     return wisdom
 
 
-@app.post("/wisdom", response_model=WisdomResponse, status_code=201)
+@app.post("/api/wisdom", response_model=WisdomResponse, status_code=201)
 async def create_wisdom(
     payload: WisdomCreate,
     session: AsyncSession = Depends(get_session),
