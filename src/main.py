@@ -51,12 +51,15 @@ async def random_wisdom(session: AsyncSession = Depends(get_session)):
 @app.get("/wisdom", response_model=list[WisdomResponse])
 async def list_wisdom(
     category: str | None = None,
+    language: str | None = None,
     session: AsyncSession = Depends(get_session),
 ):
-    """List all wisdom entries, optionally filtered by category."""
+    """List all wisdom entries, optionally filtered by category and/or language."""
     query = select(Wisdom).order_by(Wisdom.id)
     if category:
         query = query.where(Wisdom.category == category)
+    if language:
+        query = query.where(Wisdom.language == language)
     result = await session.execute(query)
     return result.scalars().all()
 
@@ -81,6 +84,7 @@ async def create_wisdom(
         text=payload.text,
         author=payload.author,
         category=payload.category.value,
+        language=payload.language,
     )
     session.add(wisdom)
     await session.commit()
