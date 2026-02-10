@@ -19,6 +19,9 @@ templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.execute(text(
+            "ALTER TABLE wisdom ADD COLUMN IF NOT EXISTS source_url VARCHAR(512)"
+        ))
 
     async with async_session() as session:
         result = await session.execute(select(func.count(Wisdom.id)))
