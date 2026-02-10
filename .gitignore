@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+*.egg-info/
+dist/
+build/
+
+
+# Ignore files created by IDEs or editors
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
