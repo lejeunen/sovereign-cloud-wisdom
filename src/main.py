@@ -162,6 +162,7 @@ async def create_wisdom(
     wisdom = Wisdom(
         text=payload.text,
         author=payload.author,
+        source_url=payload.source_url,
         category=payload.category.value,
         language=payload.language,
         translation_group=payload.translation_group,

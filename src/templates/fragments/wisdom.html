@@ -7,7 +7,7 @@
 <div id="wisdom-card" class="wisdom-card" data-translation-group="{{ wisdom.translation_group }}">
     <p class="wisdom-text">{{ wisdom.text }}</p>
     {% if wisdom.author %}
-    <p class="wisdom-author">— {{ wisdom.author }}</p>
+    <p class="wisdom-author">— {{ wisdom.author }}{% if wisdom.source_url %} <a class="wisdom-source" href="{{ wisdom.source_url }}" target="_blank" rel="noopener noreferrer">{{ 'voir la source ↗' if language == 'fr' else 'view source ↗' }}</a>{% endif %}</p>
     {% endif %}
     <span class="wisdom-category wisdom-category-{{ wisdom.category }}">{{ labels[wisdom.category][language] }}</span>
 </div>
