@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.4"></script>
     <script src="https://unpkg.com/marked@15.0.7/marked.min.js"></script>
-    <script src="/static/providers/scaleway.js"></script>
+    <script src="/static/providers/scaleway.js?v=2"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -45,8 +45,16 @@
             font-family: 'Playfair Display', Georgia, serif;
             font-size: 1.8rem;
             font-weight: 600;
-            margin-bottom: 2.5rem;
+            margin-bottom: 0.6rem;
             color: rgba(255, 255, 255, 0.85);
+            letter-spacing: 0.02em;
+        }
+
+        .subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.35);
+            margin-bottom: 2.5rem;
             letter-spacing: 0.02em;
         }
 
@@ -155,7 +163,7 @@
             justify-content: center;
         }
 
-        button, .lang-btn {
+        .lang-btn {
             font-family: 'Inter', sans-serif;
             font-size: 0.85rem;
             font-weight: 500;
@@ -170,11 +178,32 @@
             letter-spacing: 0.02em;
         }
 
-        button:hover, .lang-btn:hover {
+        .lang-btn:hover {
             background: rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.9);
             border-color: rgba(255, 255, 255, 0.2);
             transform: translateY(-1px);
+        }
+
+        #new-btn {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            padding: 0.6rem 1.8rem;
+            border-radius: 8px;
+            border: 1px solid rgba(126, 230, 184, 0.35);
+            background: rgba(126, 230, 184, 0.1);
+            color: #7ee6b8;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 0.02em;
+        }
+
+        #new-btn:hover {
+            background: rgba(126, 230, 184, 0.2);
+            border-color: rgba(126, 230, 184, 0.55);
+            transform: translateY(-1px);
+            box-shadow: 0 0 16px rgba(126, 230, 184, 0.12);
         }
 
         .lang-btn.active {
@@ -187,19 +216,43 @@
             background: rgba(200, 168, 78, 0.22);
         }
 
-        .compliance-link {
-            margin-top: 2.5rem;
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.35);
-            cursor: pointer;
-            transition: color 0.2s;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        .doc-links {
+            margin-bottom: 2.5rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: stretch;
+            justify-content: center;
         }
 
-        .compliance-link:hover {
-            color: rgba(200, 168, 78, 0.7);
-            border-color: rgba(200, 168, 78, 0.4);
+        .doc-link {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: rgba(200, 168, 78, 0.8);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: 1px solid rgba(200, 168, 78, 0.25);
+            padding: 0.55rem 1.3rem;
+            border-radius: 8px;
+            background: rgba(200, 168, 78, 0.06);
+            letter-spacing: 0.02em;
+            text-align: center;
+        }
+
+        .doc-link:hover {
+            color: #c8a84e;
+            border-color: rgba(200, 168, 78, 0.45);
+            background: rgba(200, 168, 78, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .doc-link-hint {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: rgba(108, 180, 238, 0.6);
+            margin-top: 3px;
         }
 
         .compliance-overlay {
@@ -394,6 +447,22 @@
 </head>
 <body>
     <h1 id="title">{{ "Sagesse du Cloud Souverain" if language == "fr" else "Sovereign Cloud Wisdom" }}</h1>
+    <p class="subtitle" id="subtitle">{{ "Une app démo sur un cloud souverain français, construite selon les bonnes pratiques d'infrastructure" if language == "fr" else "A demo app running on a French sovereign cloud, built with infrastructure best practices" }}</p>
+
+    <div class="doc-links">
+        <a class="doc-link" id="doc-link-why" onclick="openDoc('why')">
+            {{ "Pourquoi le cloud souverain ?" if language == "fr" else "Why sovereign cloud?" }}
+            <span class="doc-link-hint" id="doc-hint-why">{{ "synthèse décisionnelle" if language == "fr" else "executive summary" }}</span>
+        </a>
+        <a class="doc-link" id="doc-link-compliance" onclick="openDoc('compliance')">
+            {{ "Conformité" if language == "fr" else "Compliance" }}
+            <span class="doc-link-hint" id="doc-hint-compliance">{{ "pour juristes et compliance" if language == "fr" else "for legal & compliance" }}</span>
+        </a>
+        <a class="doc-link" id="doc-link-infra" onclick="openDoc('infra')">
+            {{ "Architecture" if language == "fr" else "Architecture" }}
+            <span class="doc-link-hint" id="doc-hint-infra">{{ "pour les techs" if language == "fr" else "for tech people" }}</span>
+        </a>
+    </div>
 
     {% include "fragments/wisdom.html" %}
 
@@ -414,20 +483,19 @@
         </button>
     </div>
 
-    <a class="compliance-link" id="compliance-link" onclick="toggleCompliance()">
-        {{ "Comment cette app s'inscrit dans une démarche de cloud souverain" if language == "fr" else "How this app supports cloud sovereignty" }}
-    </a>
-
     <div class="footer-links">
         <svg class="gh-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         <a href="https://github.com/lejeunen/sovereign-cloud-wisdom" target="_blank" id="app-repo-link">app</a>
         <span class="sep">·</span>
         <a href="" target="_blank" id="infra-repo-link">infra</a>
+        <span class="sep">·</span>
+        <svg class="gh-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <a href="https://www.linkedin.com/in/lejeunen/" target="_blank">contact</a>
     </div>
 
-    <div class="compliance-overlay" id="compliance-overlay" onclick="if(event.target===this)toggleCompliance()">
+    <div class="compliance-overlay" id="compliance-overlay" onclick="if(event.target===this)document.getElementById('compliance-overlay').classList.remove('open')">
         <div class="compliance-panel">
-            <button class="compliance-close" onclick="toggleCompliance()">&times;</button>
+            <button class="compliance-close" onclick="document.getElementById('compliance-overlay').classList.remove('open')">&times;</button>
             <div class="compliance-content" id="compliance-content">
                 <p class="compliance-loading">Loading...</p>
             </div>
@@ -436,7 +504,7 @@
 
     <script>
         let currentLang = "{{ language }}";
-        let complianceCache = {};
+        let docCache = {};
 
         document.getElementById("infra-repo-link").href = PROVIDER.repoUrl();
 
@@ -457,33 +525,59 @@
                 lang === "fr" ? "Sagesse du Cloud Souverain" : "Sovereign Cloud Wisdom";
             document.title = document.getElementById("title").textContent;
 
+            document.getElementById("subtitle").textContent =
+                lang === "fr"
+                    ? "Une app d\u00e9mo sur un cloud souverain fran\u00e7ais, construite selon les bonnes pratiques d\u2019infrastructure"
+                    : "A demo app running on a French sovereign cloud, built with infrastructure best practices";
+
             const newBtn = document.getElementById("new-btn");
             newBtn.setAttribute("hx-get", "/ui/wisdom?language=" + lang);
             newBtn.textContent = lang === "fr" ? "Nouvelle sagesse" : "New wisdom";
             htmx.process(newBtn);
 
-            document.getElementById("compliance-link").textContent =
-                lang === "fr"
-                    ? "Comment cette app s\u2019inscrit dans une d\u00e9marche de cloud souverain"
-                    : "How this app supports cloud sovereignty";
+            document.getElementById("doc-link-why").firstChild.textContent =
+                lang === "fr" ? "Pourquoi le cloud souverain ? " : "Why sovereign cloud? ";
+            document.getElementById("doc-hint-why").textContent =
+                lang === "fr" ? "synth\u00e8se d\u00e9cisionnelle" : "executive summary";
+            document.getElementById("doc-link-compliance").firstChild.textContent =
+                lang === "fr" ? "Conformit\u00e9 " : "Compliance ";
+            document.getElementById("doc-hint-compliance").textContent =
+                lang === "fr" ? "pour juristes et compliance" : "for legal & compliance";
+            document.getElementById("doc-link-infra").firstChild.textContent = "Architecture ";
+            document.getElementById("doc-hint-infra").textContent =
+                lang === "fr" ? "pour les techs" : "for tech people";
         }
 
-        async function toggleCompliance() {
+        let currentDoc = null;
+
+        function getDocUrl(doc) {
+            if (doc === "why") return PROVIDER.whySovereignUrl(currentLang);
+            if (doc === "compliance") return PROVIDER.complianceUrl(currentLang);
+            return PROVIDER.readmeUrl();
+        }
+
+        async function openDoc(doc) {
             const overlay = document.getElementById("compliance-overlay");
-            if (overlay.classList.contains("open")) {
+            if (overlay.classList.contains("open") && currentDoc === doc) {
                 overlay.classList.remove("open");
+                currentDoc = null;
                 return;
             }
             overlay.classList.add("open");
+            currentDoc = doc;
 
-            const url = PROVIDER.complianceUrl(currentLang);
+            const cacheKey = doc + ":" + currentLang;
+            const content = document.getElementById("compliance-content");
 
-            if (complianceCache[currentLang]) {
-                document.getElementById("compliance-content").innerHTML = complianceCache[currentLang];
+            if (docCache[cacheKey]) {
+                content.innerHTML = docCache[cacheKey];
                 return;
             }
 
+            content.innerHTML = '<p class="compliance-loading">Loading...</p>';
+
             try {
+                const url = getDocUrl(doc);
                 const res = await fetch(url);
                 const md = await res.text();
                 const renderer = new marked.Renderer();
@@ -507,8 +601,7 @@
                     return originalLink.call(this, { href, title, tokens });
                 };
                 const html = marked.parse(md, { renderer });
-                complianceCache[currentLang] = html;
-                const content = document.getElementById("compliance-content");
+                docCache[cacheKey] = html;
                 content.innerHTML = html;
                 content.addEventListener("click", function(e) {
                     const link = e.target.closest("a");
@@ -522,8 +615,7 @@
                     }
                 });
             } catch {
-                document.getElementById("compliance-content").innerHTML =
-                    "<p>Could not load compliance document.</p>";
+                content.innerHTML = "<p>Could not load document.</p>";
             }
         }
     </script>
