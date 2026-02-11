@@ -16,29 +16,16 @@ from seed import SEED_DATA
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 
-SEED_VERSION = 2
-
-
 async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        await conn.execute(text(
-            "CREATE TABLE IF NOT EXISTS meta (key VARCHAR(64) PRIMARY KEY, value VARCHAR(256))"
-        ))
 
     async with async_session() as session:
-        result = await session.execute(text("SELECT value FROM meta WHERE key = 'seed_version'"))
-        row = result.scalar_one_or_none()
-        current_version = int(row) if row else 0
-
-        if current_version < SEED_VERSION:
-            await session.execute(text("DELETE FROM wisdom"))
+        result = await session.execute(select(func.count(Wisdom.id)))
+        count = result.scalar()
+        if count == 0:
             for entry in SEED_DATA:
                 session.add(Wisdom(**entry))
-            await session.execute(text(
-                "INSERT INTO meta (key, value) VALUES ('seed_version', :v) "
-                "ON CONFLICT (key) DO UPDATE SET value = :v"
-            ), {"v": str(SEED_VERSION)})
             await session.commit()
 
 
