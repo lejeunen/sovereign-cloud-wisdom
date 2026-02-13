@@ -163,26 +163,39 @@
             justify-content: center;
         }
 
-        .lang-btn {
+        .lang-select {
+            position: fixed;
+            top: 1rem;
+            right: 1.5rem;
             font-family: 'Inter', sans-serif;
             font-size: 0.85rem;
             font-weight: 500;
-            padding: 0.55rem 1.3rem;
+            padding: 0.4rem 0.6rem;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             background: rgba(255, 255, 255, 0.05);
-            color: rgba(255, 255, 255, 0.6);
+            color: rgba(255, 255, 255, 0.7);
             cursor: pointer;
             transition: all 0.2s ease;
-            text-decoration: none;
             letter-spacing: 0.02em;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='rgba(255,255,255,0.5)'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.6rem center;
+            padding-right: 1.8rem;
+            z-index: 50;
         }
 
-        .lang-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .lang-select:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.3);
             color: rgba(255, 255, 255, 0.9);
-            border-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-1px);
+        }
+
+        .lang-select option {
+            background: #141e30;
+            color: #e8e8e8;
         }
 
         #new-btn {
@@ -206,15 +219,6 @@
             box-shadow: 0 0 16px rgba(126, 230, 184, 0.12);
         }
 
-        .lang-btn.active {
-            background: rgba(200, 168, 78, 0.15);
-            color: #c8a84e;
-            border-color: rgba(200, 168, 78, 0.35);
-        }
-
-        .lang-btn.active:hover {
-            background: rgba(200, 168, 78, 0.22);
-        }
 
         .doc-links {
             margin-bottom: 2.5rem;
@@ -222,6 +226,7 @@
             gap: 1.5rem;
             align-items: stretch;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .doc-link {
@@ -443,9 +448,33 @@
             color: rgba(255, 255, 255, 0.25);
             flex-shrink: 0;
         }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 2rem 1.25rem;
+            }
+
+            .wisdom-card {
+                padding: 2.5rem 1.5rem 2rem;
+            }
+
+            .doc-links {
+                gap: 0.75rem;
+            }
+
+            .doc-link {
+                font-size: 0.85rem;
+                padding: 0.45rem 1rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <select class="lang-select" id="lang-select" onchange="switchLanguage(this.value)">
+        <option value="en" {{ 'selected' if language == 'en' }}>English</option>
+        <option value="fr" {{ 'selected' if language == 'fr' }}>Français</option>
+    </select>
+
     <h1 id="title">{{ "Sagesse du Cloud Souverain" if language == "fr" else "Sovereign Cloud Wisdom" }}</h1>
     <p class="subtitle" id="subtitle">{{ "Une app démo sur un cloud souverain français, construite selon les bonnes pratiques d'infrastructure" if language == "fr" else "A demo app running on a French sovereign cloud, built with infrastructure best practices" }}</p>
 
@@ -467,19 +496,11 @@
     {% include "fragments/wisdom.html" %}
 
     <div class="controls">
-        <a class="lang-btn {{ 'active' if language == 'en' }}" data-lang="en"
-           hx-target="#wisdom-card"
-           hx-swap="outerHTML"
-           onclick="translateTo('en', event)">EN</a>
-        <a class="lang-btn {{ 'active' if language == 'fr' }}" data-lang="fr"
-           hx-target="#wisdom-card"
-           hx-swap="outerHTML"
-           onclick="translateTo('fr', event)">FR</a>
         <button id="new-btn"
                 hx-get="/ui/wisdom?language={{ language }}"
                 hx-target="#wisdom-card"
                 hx-swap="outerHTML">
-            {{ "Nouvelle sagesse" if language == "fr" else "New wisdom" }}
+            {{ "Obtenir une nouvelle sagesse" if language == "fr" else "Get new wisdom" }}
         </button>
     </div>
 
@@ -492,6 +513,8 @@
         <svg class="gh-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
         <a href="https://www.linkedin.com/in/lejeunen/" target="_blank">contact</a>
     </div>
+
+    <a id="htmx-lang-trigger" hx-target="#wisdom-card" hx-swap="outerHTML" style="display:none"></a>
 
     <div class="compliance-overlay" id="compliance-overlay" onclick="if(event.target===this)document.getElementById('compliance-overlay').classList.remove('open')">
         <div class="compliance-panel">
@@ -508,18 +531,16 @@
 
         document.getElementById("infra-repo-link").href = PROVIDER.repoUrl();
 
-        function translateTo(lang, event) {
+        function switchLanguage(lang) {
             if (lang === currentLang) return;
             currentLang = lang;
-            document.querySelectorAll(".lang-btn").forEach(el => el.classList.remove("active"));
-            event.target.classList.add("active");
 
             const card = document.getElementById("wisdom-card");
             const group = card.dataset.translationGroup;
-            const btn = event.target;
-            btn.setAttribute("hx-get", "/ui/wisdom/translate?translation_group=" + group + "&language=" + lang);
-            htmx.process(btn);
-            htmx.trigger(btn, "click");
+            const hidden = document.getElementById("htmx-lang-trigger");
+            hidden.setAttribute("hx-get", "/ui/wisdom/translate?translation_group=" + group + "&language=" + lang);
+            htmx.process(hidden);
+            htmx.trigger(hidden, "click");
 
             document.getElementById("title").textContent =
                 lang === "fr" ? "Sagesse du Cloud Souverain" : "Sovereign Cloud Wisdom";
@@ -532,7 +553,7 @@
 
             const newBtn = document.getElementById("new-btn");
             newBtn.setAttribute("hx-get", "/ui/wisdom?language=" + lang);
-            newBtn.textContent = lang === "fr" ? "Nouvelle sagesse" : "New wisdom";
+            newBtn.textContent = lang === "fr" ? "Obtenir une nouvelle sagesse" : "Get new wisdom";
             htmx.process(newBtn);
 
             document.getElementById("doc-link-why").firstChild.textContent =
