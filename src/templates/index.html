@@ -614,12 +614,20 @@
                     return '<h' + depth + ' id="' + slug + '">' + display + '</h' + depth + '>';
                 };
                 const baseUrl = PROVIDER.browseUrl();
+                const rawBaseUrl = "https://raw.githubusercontent.com/" + PROVIDER.repo + "/main/";
                 const originalLink = renderer.link.bind(renderer);
                 renderer.link = function({ href, title, tokens }) {
                     if (href && !href.startsWith("#") && !href.startsWith("http")) {
                         href = baseUrl + href;
                     }
                     return originalLink.call(this, { href, title, tokens });
+                };
+                const originalImage = renderer.image.bind(renderer);
+                renderer.image = function({ href, title, text }) {
+                    if (href && !href.startsWith("http")) {
+                        href = rawBaseUrl + href;
+                    }
+                    return originalImage.call(this, { href, title, text });
                 };
                 const html = marked.parse(md, { renderer });
                 docCache[cacheKey] = html;
