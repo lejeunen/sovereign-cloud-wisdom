@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database import async_session, engine, get_session
 from models import Base, Wisdom, WisdomCreate, WisdomResponse
 from seed import SEED_DATA
+from tracking import close_client, init_client, track_page_view
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
@@ -45,7 +46,9 @@ async def init_db():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
+    await init_client()
     yield
+    await close_client()
     await engine.dispose()
 
 
@@ -82,6 +85,7 @@ async def _random_wisdom(session: AsyncSession, language: str) -> Wisdom | None:
 
 @app.get("/", response_class=HTMLResponse)
 async def ui_home(request: Request, session: AsyncSession = Depends(get_session)):
+    track_page_view(request)
     language = _parse_language(request)
     wisdom = await _random_wisdom(session, language)
     return templates.TemplateResponse("index.html", {
@@ -97,6 +101,7 @@ async def ui_wisdom_fragment(
     language: str = "en",
     session: AsyncSession = Depends(get_session),
 ):
+    track_page_view(request)
     wisdom = await _random_wisdom(session, language)
     return templates.TemplateResponse("fragments/wisdom.html", {
         "request": request,
@@ -112,6 +117,7 @@ async def ui_wisdom_translate(
     language: str,
     session: AsyncSession = Depends(get_session),
 ):
+    track_page_view(request)
     result = await session.execute(
         select(Wisdom)
         .where(Wisdom.translation_group == translation_group, Wisdom.language == language)
