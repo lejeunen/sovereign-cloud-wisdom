@@ -1,8 +1,9 @@
+import hmac
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Header, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -14,6 +15,18 @@ from models import Base, Wisdom, WisdomCreate, WisdomResponse
 from seed import SEED_DATA
 
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
+
+API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
+
+
+async def verify_token(authorization: str | None = Header(default=None)):
+    if not API_AUTH_TOKEN:
+        raise HTTPException(status_code=503, detail="API token not configured.")
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid authorization header.")
+    token = authorization.removeprefix("Bearer ")
+    if not hmac.compare_digest(token, API_AUTH_TOKEN):
+        raise HTTPException(status_code=401, detail="Invalid token.")
 
 
 async def init_db():
@@ -153,7 +166,7 @@ async def get_wisdom(wisdom_id: int, session: AsyncSession = Depends(get_session
     return wisdom
 
 
-@app.post("/api/wisdom", response_model=WisdomResponse, status_code=201)
+@app.post("/api/wisdom", response_model=WisdomResponse, status_code=201, dependencies=[Depends(verify_token)])
 async def create_wisdom(
     payload: WisdomCreate,
     session: AsyncSession = Depends(get_session),

@@ -86,6 +86,33 @@ The script builds the image, tags it with the current git SHA and `latest`, then
 2. Create `src/static/providers/<provider>.js` with the `PROVIDER` object (compliance doc URLs)
 3. Run `./scripts/push-image.sh <provider>`
 
+## API authentication
+
+GET endpoints are public. The POST endpoint requires a Bearer token passed via the `Authorization` header.
+
+The token is read from the `API_AUTH_TOKEN` environment variable, injected from a Kubernetes secret managed in the infra project.
+
+### Usage
+
+```bash
+# Create a new wisdom entry
+curl -X POST https://sovereigncloudwisdom.eu/api/wisdom \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"text": "Data sovereignty starts with infrastructure choices.", "category": "principle"}'
+```
+
+### Local development
+
+```bash
+docker run -d --name wisdom-app \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PASSWORD=secret \
+  -e API_AUTH_TOKEN=my-dev-token \
+  -p 8000:8000 \
+  sovereign-cloud-wisdom
+```
+
 ## Project structure
 
 ```
