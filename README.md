@@ -114,6 +114,10 @@ docker run -d --name wisdom-app \
   sovereign-cloud-wisdom
 ```
 
+## Analytics
+
+Server-side Matomo tracking is supported via optional env vars `MATOMO_URL` and `MATOMO_SITE_ID`. See [sovereign-analytics](https://github.com/lejeunen/sovereign-analytics) for the Matomo setup.
+
 ## Project structure
 
 ```
@@ -127,6 +131,7 @@ docker run -d --name wisdom-app \
     ├── models.py               SQLAlchemy models and Pydantic schemas
     ├── database.py             Async PostgreSQL connection
     ├── seed.py                 Bilingual seed data (32 EN + 32 FR)
+    ├── tracking.py             Server-side Matomo analytics
     ├── static/
     │   └── providers/
     │       └── scaleway.js     Scaleway-specific config (compliance URLs)
