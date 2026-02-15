@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 MATOMO_URL = os.getenv("MATOMO_URL")
 MATOMO_SITE_ID = os.getenv("MATOMO_SITE_ID", "1")
+MATOMO_TOKEN_AUTH = os.getenv("MATOMO_TOKEN_AUTH")
 _client: httpx.AsyncClient | None = None
 
 
@@ -38,6 +39,9 @@ def track_page_view(request) -> None:
         "apiv": 1,
         "send_image": 0,
     }
+    if MATOMO_TOKEN_AUTH:
+        params["token_auth"] = MATOMO_TOKEN_AUTH
+        params["cip"] = request.headers.get("x-forwarded-for", "").split(",")[0].strip()
     referer = request.headers.get("referer")
     if referer:
         params["urlref"] = referer
