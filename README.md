@@ -17,7 +17,8 @@ FastAPI (Python 3.12)
 │   ├── Random      GET /api/random       Random wisdom (JSON)
 │   ├── List        GET /api/wisdom       List/filter wisdom (JSON)
 │   ├── Get         GET /api/wisdom/:id   Get by ID (JSON)
-│   └── Create      POST /api/wisdom      Add new wisdom (JSON)
+│   ├── Create      POST /api/wisdom      Add new wisdom (JSON)
+│   └── Delete      DELETE /api/wisdom/:id  Remove wisdom (JSON)
 ├── Health          GET /health           Kubernetes probe endpoint
 └── PostgreSQL      Async (SQLAlchemy + asyncpg)
 ```
@@ -88,9 +89,9 @@ The script builds the image, tags it with the current git SHA and `latest`, then
 
 ## API authentication
 
-GET endpoints are public. The POST endpoint requires a Bearer token passed via the `Authorization` header.
+GET endpoints are public. Write endpoints (POST, DELETE) require a Bearer token passed via the `Authorization` header.
 
-The token is read from the `API_AUTH_TOKEN` environment variable, injected from a Kubernetes secret managed in the infra project.
+The token is read from the `API_AUTH_TOKEN` environment variable, injected from a Kubernetes secret. See [Deploy the application](https://github.com/lejeunen/scaleway-starter-kit#6-deploy-the-application) in the infra project for setup instructions.
 
 ### Usage
 

@@ -186,6 +186,17 @@ async def create_wisdom(
     return wisdom
 
 
+@app.delete("/api/wisdom/{wisdom_id}", status_code=204, dependencies=[Depends(verify_token)])
+async def delete_wisdom(wisdom_id: int, session: AsyncSession = Depends(get_session)):
+    """Delete a wisdom entry by ID."""
+    result = await session.execute(select(Wisdom).where(Wisdom.id == wisdom_id))
+    wisdom = result.scalar_one_or_none()
+    if not wisdom:
+        raise HTTPException(status_code=404, detail="Wisdom not found.")
+    await session.delete(wisdom)
+    await session.commit()
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint — verifies database connectivity."""
