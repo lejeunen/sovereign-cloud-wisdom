@@ -18,6 +18,14 @@ from tracking import close_client, init_client, track_page_view
 templates = Jinja2Templates(directory=Path(__file__).parent / "templates")
 
 API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
+CLOUD_PROVIDER = os.getenv("CLOUD_PROVIDER", "scaleway")
+
+
+def _detect_provider(request: Request) -> str:
+    host = request.headers.get("host", "").split(":")[0]
+    if host.startswith("ovh."):
+        return "ovh"
+    return CLOUD_PROVIDER
 
 
 async def verify_token(authorization: str | None = Header(default=None)):
@@ -92,6 +100,7 @@ async def ui_home(request: Request, session: AsyncSession = Depends(get_session)
         "request": request,
         "wisdom": wisdom,
         "language": language,
+        "provider": _detect_provider(request),
     })
 
 

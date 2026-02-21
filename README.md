@@ -4,7 +4,9 @@ A demo application that serves wisdom about European digital sovereignty — pri
 
 ![Screenshot](docs/screenshot.png)
 
-This app is designed to run on **European sovereign cloud providers** as a companion to provider-specific infrastructure projects (e.g. [scaleway-starter-kit](https://github.com/lejeunen/scaleway-starter-kit)).
+This app is designed to run on **European sovereign cloud providers** as a companion to provider-specific infrastructure projects:
+- [scaleway-starter-kit](https://github.com/lejeunen/scaleway-starter-kit) — deployed at [sovereigncloudwisdom.eu](https://sovereigncloudwisdom.eu)
+- [ovh-starter-kit](https://github.com/lejeunen/ovh-starter-kit) — deployed at [ovh.sovereigncloudwisdom.eu](https://ovh.sovereigncloudwisdom.eu)
 
 ## Architecture
 
@@ -27,7 +29,7 @@ FastAPI (Python 3.12)
 
 - **Bilingual** — English and French, with linked translations. Language detected from `Accept-Language` header, switchable in the UI.
 - **Compliance panel** — Displays the infrastructure project's compliance documentation, fetched from GitHub and rendered client-side.
-- **Multi-provider** — Provider-specific configuration is isolated in env files (`.env.<provider>`) and JS files (`src/static/providers/`), making it easy to deploy on different EU cloud providers.
+- **Multi-provider** — Provider-specific configuration is isolated in env files (`.env.<provider>`) and JS files (`src/static/providers/`), making it easy to deploy on different EU cloud providers. The active provider is detected from the hostname (e.g. `ovh.sovereigncloudwisdom.eu` → OVH), with a `CLOUD_PROVIDER` env var fallback for local development.
 
 ## Prerequisites
 
@@ -61,12 +63,15 @@ Each cloud provider has its own env file with registry and authentication settin
 
 ### Setup
 
+1. Create a project/namespace in your cloud provider's container registry (e.g. `sovereign-cloud-wisdom`). The `REGISTRY` URL in the env file must match an existing project.
+2. Copy and fill in the env file:
+
 ```bash
 # Copy the example env file for your provider
-cp .env.scaleway.example .env.scaleway
+cp .env.<provider>.example .env.<provider>
 
 # Edit it with your credentials
-vi .env.scaleway
+vi .env.<provider>
 ```
 
 ### Push
@@ -77,6 +82,7 @@ vi .env.scaleway
 
 # Push to a specific provider
 ./scripts/push-image.sh scaleway
+./scripts/push-image.sh ovh
 ```
 
 The script builds the image, tags it with the current git SHA and `latest`, then pushes both tags.
@@ -91,7 +97,7 @@ The script builds the image, tags it with the current git SHA and `latest`, then
 
 GET endpoints are public. Write endpoints (POST, DELETE) require a Bearer token passed via the `Authorization` header.
 
-The token is read from the `API_AUTH_TOKEN` environment variable, injected from a Kubernetes secret. See [Deploy the application](https://github.com/lejeunen/scaleway-starter-kit#6-deploy-the-application) in the infra project for setup instructions.
+The token is read from the `API_AUTH_TOKEN` environment variable, injected from a Kubernetes secret. See the deployment section in your infra project ([scaleway-starter-kit](https://github.com/lejeunen/scaleway-starter-kit), [ovh-starter-kit](https://github.com/lejeunen/ovh-starter-kit)) for setup instructions.
 
 ### Usage
 
@@ -124,6 +130,7 @@ Server-side Matomo tracking is supported via optional env vars `MATOMO_URL` and 
 ├── Dockerfile                  Multi-stage production build
 ├── requirements.txt            Python dependencies
 ├── .env.scaleway.example       Scaleway registry config template
+├── .env.ovh.example            OVH registry config template
 ├── scripts/
 │   └── push-image.sh           Build, tag, and push to a cloud registry
 └── src/
@@ -134,7 +141,8 @@ Server-side Matomo tracking is supported via optional env vars `MATOMO_URL` and 
     ├── tracking.py             Server-side Matomo analytics
     ├── static/
     │   └── providers/
-    │       └── scaleway.js     Scaleway-specific config (compliance URLs)
+    │       ├── scaleway.js     Scaleway-specific config
+    │       └── ovh.js          OVHcloud-specific config
     └── templates/
         ├── index.html          Main page (Jinja2 + HTMX)
         └── fragments/
