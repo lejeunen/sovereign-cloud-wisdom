@@ -24,28 +24,28 @@ spec:
           env:
             - name: DB_HOST
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.clusterName }}-app
+                configMapKeyRef:
+                  name: {{ .Values.database.configMap }}
                   key: host
             - name: DB_PORT
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.clusterName }}-app
+                configMapKeyRef:
+                  name: {{ .Values.database.configMap }}
                   key: port
             - name: DB_NAME
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.database.clusterName }}-app
+                configMapKeyRef:
+                  name: {{ .Values.database.configMap }}
                   key: dbname
             - name: DB_USER
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.clusterName }}-app
+                  name: {{ .Values.database.secret }}
                   key: user
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.clusterName }}-app
+                  name: {{ .Values.database.secret }}
                   key: password
             - name: CLOUD_PROVIDER
               value: {{ .Values.cloudProvider }}

@@ -6,12 +6,8 @@ image:
   pullSecret: sovereign-cloud-wisdom-registry
 
 database:
-  clusterName: wisdom-db
-  instances: 1
-  storage: 1Gi
-  resources:
-    requests:
-      memory: 256Mi
+  configMap: wisdom-db-config
+  secret: wisdom-db-credentials
 
 resources:
   requests:
@@ -19,9 +15,4 @@ resources:
   limits:
     memory: 256Mi
 
-hostname: wisdom.scw.sovereigncloudwisdom.eu
 cloudProvider: scaleway
-
-gateway:
-  name: eg
-  namespace: envoy-gateway-system
