@@ -1,9 +1,9 @@
 replicaCount: 1
 
 image:
-  repository: rg.fr-par.scw.cloud/sovereign-cloud-wisdom/sovereign-cloud-wisdom
+  repository: ""
   tag: latest
-  pullSecret: sovereign-cloud-wisdom-registry
+  pullSecret: ""
 
 database:
   configMap: wisdom-db-config
@@ -15,4 +15,4 @@ resources:
   limits:
     memory: 256Mi
 
-cloudProvider: scaleway
+cloudProvider: ""

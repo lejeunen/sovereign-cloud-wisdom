@@ -14,8 +14,10 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}
     spec:
+      {{- if .Values.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.image.pullSecret }}
+      {{- end }}
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -47,8 +49,10 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
                   key: password
+            {{- if .Values.cloudProvider }}
             - name: CLOUD_PROVIDER
               value: {{ .Values.cloudProvider }}
+            {{- end }}
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}
