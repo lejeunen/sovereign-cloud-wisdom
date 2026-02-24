@@ -1,0 +1,5 @@
+apiVersion: v2
+name: sovereign-cloud-wisdom
+description: Sovereign cloud wisdom demo app with PostgreSQL
+version: 0.1.0
+appVersion: "1.0.0"

@@ -1,0 +1,27 @@
+replicaCount: 1
+
+image:
+  repository: rg.fr-par.scw.cloud/sovereign-cloud-wisdom/sovereign-cloud-wisdom
+  tag: latest
+  pullSecret: sovereign-cloud-wisdom-registry
+
+database:
+  clusterName: wisdom-db
+  instances: 1
+  storage: 1Gi
+  resources:
+    requests:
+      memory: 256Mi
+
+resources:
+  requests:
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+hostname: wisdom.scw.sovereigncloudwisdom.eu
+cloudProvider: scaleway
+
+gateway:
+  name: eg
+  namespace: envoy-gateway-system
