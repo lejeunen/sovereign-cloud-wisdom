@@ -25,7 +25,8 @@ if [ -z "${REGISTRY_LOGIN_CMD:-}" ]; then
     exit 1
 fi
 
-TAG=$(git -C "$PROJECT_DIR" rev-parse --short HEAD)
+COMMIT_SHA=$(git -C "$PROJECT_DIR" rev-parse --short HEAD)
+TAG="$(date +%s)-${COMMIT_SHA}"
 FULL_IMAGE="$REGISTRY/$IMAGE_NAME"
 
 echo "==> Logging in to $REGISTRY"
