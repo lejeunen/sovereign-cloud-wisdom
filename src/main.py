@@ -218,7 +218,7 @@ async def health_check():
     try:
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
-        return {"status": "healthy", "database": "connected"}
+        return {"status": "healthy", "database": "connected", "build": os.getenv("BUILD_TAG", "unknown")}
     except Exception as e:
         raise HTTPException(
             status_code=503,

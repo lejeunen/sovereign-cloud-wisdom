@@ -49,6 +49,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
                   key: password
+            - name: BUILD_TAG
+              value: {{ .Values.image.tag | quote }}
             {{- if .Values.cloudProvider }}
             - name: CLOUD_PROVIDER
               value: {{ .Values.cloudProvider }}
