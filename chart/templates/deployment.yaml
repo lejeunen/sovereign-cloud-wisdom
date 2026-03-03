@@ -53,6 +53,24 @@ spec:
             - name: CLOUD_PROVIDER
               value: {{ .Values.cloudProvider }}
             {{- end }}
+            - name: MATOMO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: matomo-config
+                  key: matomo-url
+                  optional: true
+            - name: MATOMO_SITE_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: matomo-config
+                  key: matomo-site-id
+                  optional: true
+            - name: MATOMO_TOKEN_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: matomo-token-auth
+                  key: token
+                  optional: true
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}
