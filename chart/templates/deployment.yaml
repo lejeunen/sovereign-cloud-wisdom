@@ -73,6 +73,12 @@ spec:
                   name: matomo-token-auth
                   key: token
                   optional: true
+            - name: API_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: wisdom-api-auth-token
+                  key: token
+                  optional: true
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}
