@@ -50,7 +50,7 @@ def track_page_view(request) -> None:
 
 async def _send(params: dict) -> None:
     try:
-        resp = await _client.get("/matomo.php", params=params)
+        resp = await _client.post("/matomo.php", data=params)
         logger.debug("Matomo response: %s", resp.status_code)
     except Exception:
         logger.warning("Matomo tracking request failed", exc_info=True)
