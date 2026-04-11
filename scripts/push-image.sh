@@ -32,17 +32,12 @@ FULL_IMAGE="$REGISTRY/$IMAGE_NAME"
 echo "==> Logging in to $REGISTRY"
 eval "$REGISTRY_LOGIN_CMD"
 
-echo "==> Building image"
-docker build -t "$IMAGE_NAME" "$PROJECT_DIR"
-
-echo "==> Tagging $FULL_IMAGE:$TAG and $FULL_IMAGE:latest"
-docker tag "$IMAGE_NAME" "$FULL_IMAGE:$TAG"
-docker tag "$IMAGE_NAME" "$FULL_IMAGE:latest"
-
-echo "==> Pushing $FULL_IMAGE:$TAG"
-docker push "$FULL_IMAGE:$TAG"
-
-echo "==> Pushing $FULL_IMAGE:latest"
-docker push "$FULL_IMAGE:latest"
+echo "==> Building and pushing multi-platform image"
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    -t "$FULL_IMAGE:$TAG" \
+    -t "$FULL_IMAGE:latest" \
+    --push \
+    "$PROJECT_DIR"
 
 echo "==> Done"
