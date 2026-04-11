@@ -7,6 +7,8 @@ image:
 
 podLabels: {}
 
+env: []
+
 database:
   configMap: wisdom-db-config
   secret: wisdom-db-credentials

@@ -82,6 +82,10 @@ spec:
                   name: wisdom-api-auth-token
                   key: token
                   optional: true
+            {{- range .Values.env }}
+            - name: {{ .name }}
+              value: {{ .value | quote }}
+            {{- end }}
           resources:
             requests:
               memory: {{ .Values.resources.requests.memory }}
