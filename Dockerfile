@@ -10,6 +10,7 @@ RUN groupadd --gid 1000 app && useradd --uid 1000 --gid app --no-create-home app
 
 WORKDIR /app
 COPY --from=builder /deps /usr/local/lib/python3.12/site-packages
+COPY --from=builder /deps/bin/ /usr/local/bin/
 COPY src/ .
 
 USER app
