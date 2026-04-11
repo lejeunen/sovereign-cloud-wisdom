@@ -20,5 +20,4 @@ COPY src/ .
 USER app
 EXPOSE 8000
 
-ENV OTEL_PYTHON_LOG_LEVEL=debug
 CMD ["opentelemetry-instrument", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
