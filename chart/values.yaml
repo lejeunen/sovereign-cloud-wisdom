@@ -5,6 +5,8 @@ image:
   tag: latest
   pullSecret: ""
 
+podLabels: {}
+
 database:
   configMap: wisdom-db-config
   secret: wisdom-db-credentials
